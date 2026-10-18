@@ -34,3 +34,23 @@ Use `POST /api/incidents/{incident_id}/investigate` with incident ID `INC-1042`.
 
 ## Limitations
 Live service health monitoring is not integrated. The root cause remains a hypothesis until verified with deployment logs and monitoring metrics.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[React + Vite Frontend] -->|HTTP API| B[FastAPI Backend]
+    B --> C[Ollama - Qwen3:4b]
+    B --> D[(FalkorDB Graph Database)]
+    D --> E[Service Dependencies]
+    C --> F[Investigation Report]
+    E --> F
+    F --> A
+```
+
+### How it works
+
+- **React + Vite:** Provides the incident investigation interface.
+- **FastAPI:** Handles backend requests and coordinates investigations.
+- **Ollama (Qwen3:4b):** Supports AI-assisted incident analysis.
+- **FalkorDB:** Stores and explores relationships between services.
