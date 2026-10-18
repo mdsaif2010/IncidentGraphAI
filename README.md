@@ -36,87 +36,76 @@ Use `POST /api/incidents/{incident_id}/investigate` with incident ID `INC-1042`.
 Live service health monitoring is not integrated. The root cause remains a hypothesis until verified with deployment logs and monitoring metrics.
 
 
+
 ## 🏗️ System Architecture
 
 ```mermaid
-flowchart TB
-    %% User Interface
-    subgraph UI["🖥️ Presentation Layer"]
-        A["👨‍💻 Engineer / SRE"]
-        B["React + Vite<br/>IncidentGraphAI Dashboard"]
-        A --> B
-    end
+flowchart TD
+    A["Engineer / SRE"] --> B["React + Vite Dashboard"]
+    B -->|"HTTP requests"| C["FastAPI Backend"]
 
-    %% Backend
-    subgraph API["⚙️ Backend Layer"]
-        C["FastAPI<br/>Investigation API"]
-        D["Incident Analysis<br/>& Evidence Processing"]
-        E["Report Assembly<br/>Facts · Hypotheses · Next Checks"]
-        C --> D
-        D --> E
-    end
+    C --> D["Incident Investigation"]
+    D --> E["Evidence and Context Processing"]
 
-    %% Intelligence
-    subgraph AI["🧠 AI Reasoning"]
-        F["Ollama<br/>Qwen3:4b"]
-    end
+    E --> F["Ollama - Qwen3:4b"]
+    E --> G[("FalkorDB Graph Database")]
 
-    %% Graph Database
-    subgraph GRAPH["🕸️ Graph Intelligence — FalkorDB"]
-        G[("FalkorDB")]
-        H["Service Nodes"]
-        I["Dependency Relationships"]
-        J["Incident Context"]
-        G --- H
-        G --- I
-        G --- J
-    end
+    G --> H["Service Nodes and Dependencies"]
+    F --> I["AI-Assisted Analysis"]
+    H --> J["Investigation Report"]
+    I --> J
 
-    %% Main request flow
-    B -->|"HTTP requests"| C
-    D -->|"AI analysis request"| F
-    F -->|"Model response"| D
-    D -->|"Retrieve graph context"| G
-    G -->|"Related services & dependencies"| D
-    E -->|"Investigation results"| B
+    J --> K["Facts and Findings"]
+    J --> L["Hypotheses"]
+    J --> M["Missing Evidence"]
+    J --> N["Recommended Next Checks"]
 
-    %% Styling
-    classDef frontend fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px
-    classDef backend fill:#d1fae5,stroke:#059669,color:#064e3b,stroke-width:2px
-    classDef ai fill:#f3e8ff,stroke:#9333ea,color:#581c87,stroke-width:2px
-    classDef graph fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    K --> O["Dashboard Results"]
+    L --> O
+    M --> O
+    N --> O
+    O --> B
 
-    class A,B frontend
-    class C,D,E backend
-    class F ai
-    class G,H,I,J graph
+    style A fill:#dbeafe,stroke:#2563eb,color:#111827
+    style B fill:#dbeafe,stroke:#2563eb,color:#111827
+    style C fill:#d1fae5,stroke:#059669,color:#111827
+    style D fill:#d1fae5,stroke:#059669,color:#111827
+    style E fill:#d1fae5,stroke:#059669,color:#111827
+    style F fill:#f3e8ff,stroke:#9333ea,color:#111827
+    style G fill:#ffedd5,stroke:#ea580c,color:#111827
+    style H fill:#ffedd5,stroke:#ea580c,color:#111827
+    style I fill:#f3e8ff,stroke:#9333ea,color:#111827
+    style J fill:#f3f4f6,stroke:#6b7280,color:#111827
+    style K fill:#f3f4f6,stroke:#6b7280,color:#111827
+    style L fill:#f3f4f6,stroke:#6b7280,color:#111827
+    style M fill:#f3f4f6,stroke:#6b7280,color:#111827
+    style N fill:#f3f4f6,stroke:#6b7280,color:#111827
+    style O fill:#dbeafe,stroke:#2563eb,color:#111827
 ```
 
 ### 🔍 How It Works
 
-1. **Incident Input:** Engineers investigate incidents through the React dashboard.
-2. **Backend Orchestration:** FastAPI coordinates the investigation workflow.
-3. **AI-Assisted Analysis:** Ollama runs Qwen3:4b to support analysis of available evidence.
-4. **Graph Context:** FalkorDB represents service dependencies and helps retrieve related graph context.
-5. **Structured Results:** The application presents investigation findings, hypotheses, missing evidence, and suggested next checks.
+1. **Incident Input:** Engineers use the React dashboard to select and investigate incidents.
+2. **Backend Orchestration:** FastAPI receives requests and coordinates the investigation workflow.
+3. **Evidence Processing:** The backend organizes available incident details and relevant context.
+4. **AI-Assisted Analysis:** Ollama runs the Qwen3:4b model to support investigation and hypothesis generation.
+5. **Graph Intelligence:** FalkorDB stores relationships between services, helping the application explore dependencies and related context.
+6. **Structured Results:** The dashboard presents findings, possible explanations, missing evidence, and suggested next checks.
 
-### 🚀 Technology Stack
+### 🛠️ Technology Stack
 
-| Component | Technology | Purpose |
+| Component | Technology | Responsibility |
 |---|---|---|
 | Frontend | React + Vite | Interactive investigation dashboard |
-| Backend | FastAPI | API and investigation orchestration |
-| AI Model | Ollama + Qwen3:4b | Local AI-assisted analysis |
-| Graph Database | FalkorDB | Service relationships and graph context |
-```
+| Backend | FastAPI | API and investigation workflow |
+| AI Runtime | Ollama | Runs the local language model |
+| AI Model | Qwen3:4b | AI-assisted incident analysis |
+| Graph Database | FalkorDB | Service relationships and dependency context |
+| Graph Format | Mermaid | Architecture visualization in README |
 
-**Important:** The diagram assumes the backend calls both Ollama and FalkorDB during investigation. Keep those arrows only if they match your actual code.
+### 💡 Why FalkorDB?
 
-### Now, bro — fast
+FalkorDB provides a graph-based way to represent relationships between services and their dependencies. This connected context can help IncidentGraphAI explore how components relate to an incident instead of treating each service as an isolated entity.
 
-1. Copy the section into `README.md`.
-2. Commit the README update on GitHub.
-3. Check that the Mermaid graph renders.
-4. Get straight back to recording your demo.
+The investigation output is intended to support engineers with structured findings and follow-up checks. Suggested root causes remain hypotheses until validated against appropriate logs, deployment records, and monitoring data.
 
-Don't spend the remaining time chasing perfect styling. A clear, accurate architecture diagram is what matters.
